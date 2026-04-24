@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CSV Data Import - Silver Fleet</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Manrope:wght@600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#b0c6ff",
+                        "tertiary-fixed": "#e1e2e8",
+                        "surface-container-low": "#191c1f",
+                        "on-primary": "#002d6e",
+                        "on-secondary-fixed-variant": "#464747",
+                        "surface-container-high": "#272a2e",
+                        "tertiary-container": "#8e9196",
+                        "outline": "#8c90a0",
+                        "on-error": "#690005",
+                        "surface-dim": "#111417",
+                        "secondary": "#c6c6c6",
+                        "on-background": "#e1e2e7",
+                        "on-secondary-container": "#b8b8b8",
+                        "secondary-fixed": "#e3e2e2",
+                        "on-primary-container": "#002661",
+                        "on-secondary": "#2f3131",
+                        "error": "#ffb4ab",
+                        "surface-variant": "#323538",
+                        "primary-fixed": "#d9e2ff",
+                        "surface-container-lowest": "#0b0e11",
+                        "on-tertiary-fixed": "#191c20",
+                        "primary-fixed-dim": "#b0c6ff",
+                        "surface-container": "#1d2023",
+                        "tertiary": "#c5c6cc",
+                        "primary": "#b0c6ff",
+                        "on-tertiary-fixed-variant": "#44474b",
+                        "background": "#111417",
+                        "on-error-container": "#ffdad6",
+                        "on-surface-variant": "#c2c6d7",
+                        "secondary-container": "#484949",
+                        "surface": "#111417",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "on-surface": "#e1e2e7",
+                        "inverse-on-surface": "#2e3134",
+                        "outline-variant": "#424655",
+                        "on-primary-fixed-variant": "#00429b",
+                        "secondary-fixed-dim": "#c6c6c6",
+                        "inverse-surface": "#e1e2e7",
+                        "tertiary-fixed-dim": "#c5c6cc",
+                        "on-primary-fixed": "#001945",
+                        "primary-container": "#558dff",
+                        "on-tertiary-container": "#272a2e",
+                        "on-tertiary": "#2e3135",
+                        "inverse-primary": "#0058ca",
+                        "surface-bright": "#37393d",
+                        "surface-container-highest": "#323538"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "tight-gap": "8px",
+                        "unit": "4px",
+                        "grid-columns": "12",
+                        "container-padding": "24px",
+                        "component-gap": "16px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "h2": ["Manrope"],
+                        "body-lg": ["Inter"],
+                        "data-mono": ["Inter"],
+                        "display": ["Manrope"],
+                        "label-caps": ["Inter"],
+                        "h1": ["Manrope"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "h2": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "data-mono": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "display": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-caps": ["11px", {"lineHeight": "1", "letterSpacing": "0.08em", "fontWeight": "700"}],
+                        "h1": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body-sm text-body-sm antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Shared Component: SideNavBar -->
+<aside class="bg-slate-900 dark:bg-[#1A1D21] fixed left-0 top-0 h-full w-64 border-r border-slate-800 dark:border-[#2D3139] flat no shadows flex flex-col h-full py-4 z-20">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary/20 flex items-center justify-center shrink-0 border border-primary/30">
+<span class="material-symbols-outlined text-blue-500 dark:text-[#2979FF]" style="font-variation-settings: 'FILL' 1;">terminal</span>
+</div>
+<div class="flex flex-col">
+<span class="text-lg font-black tracking-tighter text-slate-100 dark:text-[#C0C0C0] leading-none">SILVER FLEET</span>
+<span class="font-['Manrope'] antialiased tracking-tight text-[10px] text-slate-400 dark:text-[#C0C0C0] opacity-70 uppercase mt-1">Institutional Terminal</span>
+</div>
+</div>
+<nav class="flex flex-col gap-1 px-3">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 dark:text-[#C0C0C0] opacity-70 hover:bg-slate-800 dark:hover:bg-[#262A31] hover:text-white transition-colors duration-150 scale-98 active:opacity-80 transition-all font-['Manrope'] antialiased tracking-tight text-sm" href="#">
+<span class="material-symbols-outlined text-lg">dashboard</span>
+                Executive Overview
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 dark:text-[#C0C0C0] opacity-70 hover:bg-slate-800 dark:hover:bg-[#262A31] hover:text-white transition-colors duration-150 scale-98 active:opacity-80 transition-all font-['Manrope'] antialiased tracking-tight text-sm" href="#">
+<span class="material-symbols-outlined text-lg">monitoring</span>
+                Market Performance
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 dark:text-[#C0C0C0] opacity-70 hover:bg-slate-800 dark:hover:bg-[#262A31] hover:text-white transition-colors duration-150 scale-98 active:opacity-80 transition-all font-['Manrope'] antialiased tracking-tight text-sm" href="#">
+<span class="material-symbols-outlined text-lg">pie_chart</span>
+                Asset Allocation
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 dark:bg-[#262A31] text-blue-500 dark:text-[#2979FF] border-r-2 border-blue-500 dark:border-[#2979FF] scale-98 active:opacity-80 transition-all font-['Manrope'] antialiased tracking-tight text-sm" href="#">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">upload_file</span>
+                CSV Data Import
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 dark:text-[#C0C0C0] opacity-70 hover:bg-slate-800 dark:hover:bg-[#262A31] hover:text-white transition-colors duration-150 scale-98 active:opacity-80 transition-all font-['Manrope'] antialiased tracking-tight text-sm" href="#">
+<span class="material-symbols-outlined text-lg">settings</span>
+                System Settings
+            </a>
+</nav>
+</aside>
+<!-- Shared Component: TopAppBar -->
+<header class="bg-slate-900/95 dark:bg-[#1A1D21]/95 backdrop-blur-md fixed top-0 right-0 left-64 h-14 border-b border-slate-800 dark:border-[#2D3139] flat no shadows flex items-center justify-between px-6 z-10">
+<div class="flex items-center">
+<span class="font-['Manrope'] font-semibold text-xs uppercase tracking-widest text-blue-500 dark:text-[#2979FF]">Terminal Console</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-slate-400 dark:text-[#C0C0C0] hover:text-blue-400 dark:hover:text-[#2979FF]/80 transition-opacity duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-slate-400 dark:text-[#C0C0C0] hover:text-blue-400 dark:hover:text-[#2979FF]/80 transition-opacity duration-200">
+<span class="material-symbols-outlined">query_stats</span>
+</button>
+<button class="text-slate-400 dark:text-[#C0C0C0] hover:text-blue-400 dark:hover:text-[#2979FF]/80 transition-opacity duration-200">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-14 p-container-padding flex flex-col gap-component-gap min-h-[calc(100vh-3.5rem)]">
+<!-- Header -->
+<div class="flex flex-col gap-1 mb-2">
+<h1 class="font-h1 text-h1 text-on-surface">Data Ingestion Protocol</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Initialize bulk data import via BUX standardized CSV format or review recent transaction logs.</p>
+</div>
+<!-- Grid Layout -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Left Column: Upload & Instructions -->
+<div class="col-span-12 lg:col-span-8 flex flex-col gap-component-gap">
+<!-- Drag and Drop Zone -->
+<section class="bg-surface border border-outline-variant rounded-lg p-6 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h2 class="font-h2 text-h2 text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">file_upload</span>
+                            Secure File Upload
+                        </h2>
+<span class="font-label-caps text-label-caps text-on-surface-variant bg-surface-container px-2 py-1 rounded">BUX FORMAT ONLY</span>
+</div>
+<div class="border-2 border-dashed border-outline-variant hover:border-primary bg-surface-dim hover:bg-surface-container-low transition-colors duration-200 rounded-lg p-12 flex flex-col items-center justify-center cursor-pointer group">
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mb-4 group-hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-[32px] text-on-surface-variant group-hover:text-primary transition-colors">cloud_upload</span>
+</div>
+<span class="font-h2 text-h2 text-on-surface mb-2">Drag &amp; drop BUX CSV files here</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mb-6">or click to browse local directory</span>
+<button class="bg-primary text-on-primary font-data-mono text-data-mono px-4 py-2 rounded flex items-center gap-2 hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">folder_open</span>
+                            SELECT FILE
+                        </button>
+</div>
+</section>
+<!-- Manual Entry Instructions -->
+<section class="bg-surface border border-outline-variant rounded-lg p-6">
+<h3 class="font-h2 text-h2 text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-[20px]">rule</span>
+                        Format Specification Requirements
+                    </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">Ensure CSV files adhere strictly to the following columnar structure. Headers must exactly match the stipulated fields below.</p>
+<div class="overflow-x-auto border border-outline-variant rounded bg-surface-container-low">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant">
+<th class="py-2 px-4 font-label-caps text-label-caps text-on-surface-variant bg-surface-dim">COLUMN HEADER</th>
+<th class="py-2 px-4 font-label-caps text-label-caps text-on-surface-variant bg-surface-dim">DATA TYPE</th>
+<th class="py-2 px-4 font-label-caps text-label-caps text-on-surface-variant bg-surface-dim">DESCRIPTION</th>
+</tr>
+</thead>
+<tbody class="font-data-mono text-[13px] text-on-surface">
+<tr class="border-b border-outline-variant/50 hover:bg-surface-variant/30 transition-colors">
+<td class="py-2 px-4 text-primary">TransactionDate</td>
+<td class="py-2 px-4">YYYY-MM-DD</td>
+<td class="py-2 px-4 font-body-sm text-[13px] text-on-surface-variant">Execution date of the trade.</td>
+</tr>
+<tr class="border-b border-outline-variant/50 hover:bg-surface-variant/30 transition-colors">
+<td class="py-2 px-4 text-primary">AssetTicker</td>
+<td class="py-2 px-4">String (Max 10)</td>
+<td class="py-2 px-4 font-body-sm text-[13px] text-on-surface-variant">Standard exchange ticker symbol.</td>
+</tr>
+<tr class="border-b border-outline-variant/50 hover:bg-surface-variant/30 transition-colors">
+<td class="py-2 px-4 text-primary">Volume</td>
+<td class="py-2 px-4">Decimal (Precision 4)</td>
+<td class="py-2 px-4 font-body-sm text-[13px] text-on-surface-variant">Number of units or shares transacted.</td>
+</tr>
+<tr class="hover:bg-surface-variant/30 transition-colors">
+<td class="py-2 px-4 text-primary">ExecutionPrice</td>
+<td class="py-2 px-4">Decimal (Precision 4)</td>
+<td class="py-2 px-4 font-body-sm text-[13px] text-on-surface-variant">Price per unit in base currency.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+<!-- Right Column: Recent Logs -->
+<div class="col-span-12 lg:col-span-4">
+<section class="bg-surface border border-outline-variant rounded-lg p-6 h-full flex flex-col">
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-h2 text-h2 text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">history</span>
+                            Recent Ingestions
+                        </h2>
+<button class="text-primary hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined text-[20px]">refresh</span>
+</button>
+</div>
+<div class="flex flex-col gap-3 flex-grow">
+<!-- Log Item 1: Success -->
+<div class="flex items-start gap-3 p-3 rounded border border-outline-variant/50 bg-surface-container-low hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined text-[20px] text-[#4ade80] mt-0.5" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div class="flex flex-col w-full">
+<div class="flex justify-between items-start mb-1">
+<span class="font-data-mono text-[13px] text-on-surface truncate max-w-[180px]">Q3_Equities_Bulk.csv</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">10:42 AM</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-sm text-[12px] text-on-surface-variant">Processed 1,204 rows</span>
+<span class="font-label-caps text-[10px] bg-[#4ade80]/10 text-[#4ade80] px-1.5 py-0.5 rounded">SUCCESS</span>
+</div>
+</div>
+</div>
+<!-- Log Item 2: Warning -->
+<div class="flex items-start gap-3 p-3 rounded border border-outline-variant/50 bg-surface-container-low hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined text-[20px] text-[#facc15] mt-0.5" style="font-variation-settings: 'FILL' 1;">warning</span>
+<div class="flex flex-col w-full">
+<div class="flex justify-between items-start mb-1">
+<span class="font-data-mono text-[13px] text-on-surface truncate max-w-[180px]">APAC_FX_Trades_Sep.csv</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">YESTERDAY</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-sm text-[12px] text-on-surface-variant">3 rows skipped (Invalid format)</span>
+<span class="font-label-caps text-[10px] bg-[#facc15]/10 text-[#facc15] px-1.5 py-0.5 rounded">PARTIAL</span>
+</div>
+</div>
+</div>
+<!-- Log Item 3: Error -->
+<div class="flex items-start gap-3 p-3 rounded border border-error/30 bg-error/5 hover:bg-error/10 transition-colors">
+<span class="material-symbols-outlined text-[20px] text-error mt-0.5" style="font-variation-settings: 'FILL' 1;">error</span>
+<div class="flex flex-col w-full">
+<div class="flex justify-between items-start mb-1">
+<span class="font-data-mono text-[13px] text-on-surface truncate max-w-[180px]">Unknown_Source_Data.csv</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">OCT 12</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-sm text-[12px] text-error">Header mismatch detected</span>
+<span class="font-label-caps text-[10px] bg-error/20 text-error px-1.5 py-0.5 rounded">FAILED</span>
+</div>
+</div>
+</div>
+<!-- Log Item 4: Success -->
+<div class="flex items-start gap-3 p-3 rounded border border-outline-variant/50 bg-surface-container-low hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined text-[20px] text-[#4ade80] mt-0.5" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div class="flex flex-col w-full">
+<div class="flex justify-between items-start mb-1">
+<span class="font-data-mono text-[13px] text-on-surface truncate max-w-[180px]">FixedIncome_YTD.csv</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">OCT 10</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-sm text-[12px] text-on-surface-variant">Processed 8,450 rows</span>
+<span class="font-label-caps text-[10px] bg-[#4ade80]/10 text-[#4ade80] px-1.5 py-0.5 rounded">SUCCESS</span>
+</div>
+</div>
+</div>
+</div>
+<button class="mt-4 w-full border border-outline-variant text-on-surface-variant font-label-caps text-label-caps py-2 rounded hover:bg-surface-container transition-colors">
+                        VIEW FULL AUDIT TRAIL
+                    </button>
+</section>
+</div>
+</div>
+</main>
+</body></html>

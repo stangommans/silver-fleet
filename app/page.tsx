@@ -1,65 +1,104 @@
-import Image from "next/image";
+"use client";
+
+import Link from "next/link";
+import { UploadCloud } from "lucide-react";
+import { usePortfolio } from '@/components/providers/portfolio-provider';
+import { MetricsBar } from '@/components/dashboard/metrics-bar';
+import { ManualTransactionModal } from '@/components/manual-entry/manual-transaction-modal';
+import { AlertTriangle } from 'lucide-react';
+import { AllocationChart } from "@/components/dashboard/allocation-chart";
 
 export default function Home() {
+  const { transactions, totalInvested, cashBalance, holdings, livePortfolioValue, livePrices, fxRates } = usePortfolio();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col gap-8 font-sans">
+        
+      <header className="border-b border-[#2D3139] pb-6">
+        <h1 className="text-3xl font-heading font-bold tracking-tight text-white mb-2">Executive Overview</h1>
+        <p className="text-[#a1a1aa] text-sm">Real-time portfolio metrics and macro performance indicators.</p>
+      </header>
+
+      {transactions.length === 0 ? (
+        <div className="mt-12 max-w-2xl mx-auto w-full flex flex-col items-center justify-center p-12 border-2 border-dashed border-[#3f3f46] rounded-lg bg-[#1A1D21]">
+          <div className="p-4 rounded-full bg-[#2D3139] mb-4">
+            <UploadCloud className="w-8 h-8 text-[#C0C0C0]" />
+          </div>
+          <h3 className="font-heading font-semibold text-[#e1e2e7] text-lg">No Portfolio Data Found</h3>
+          <p className="text-sm text-[#a1a1aa] mt-2 mb-6 text-center">To calculate metrics, you must first import a BUX transaction export into the engine.</p>
+          <Link href="/import" className="bg-[#2979FF] hover:bg-[#2979FF]/90 text-white font-medium px-4 py-2 rounded transition-colors text-sm">
+            Go to CSV Import
+          </Link>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      ) : (
+        <>
+          {/* Top Level Metrics */}
+          <MetricsBar totalInvested={totalInvested} cashBalance={cashBalance} livePortfolioValue={livePortfolioValue} />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 flex flex-col gap-6">
+                <AllocationChart />
+              </div>
+
+              <div className="flex flex-col gap-6">
+                {/* Active Holdings List */}
+                <div className="bg-[#1A1D21] border border-[#3f3f46] p-4 rounded flex flex-col">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-[11px] uppercase tracking-widest font-heading font-bold text-[#a1a1aa]">Active Holdings Matrix</h3>
+                    <ManualTransactionModal />
+                  </div>
+                  
+                  {Object.entries(holdings).length === 0 ? (
+                    <p className="text-[#a1a1aa] text-sm mt-4 italic">No open positions.</p>
+                  ) : (
+                    <ul className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                      {Object.entries(holdings).map(([assetId, data]) => {
+                        const priceData = livePrices[assetId];
+                        const isLive = priceData != null;
+                        
+                        let liveValueEur = data.totalInvested;
+                        if (isLive) {
+                          const rate = fxRates[priceData.currency] || 1;
+                          liveValueEur = (priceData.price * rate) * data.quantity;
+                        }
+                        
+                        const isProfitable = liveValueEur >= data.totalInvested;
+
+                        return (
+                          <li key={assetId} className="flex justify-between items-center pb-2 border-b border-[#2D3139] last:border-0 hover:bg-[#262A31] -mx-4 px-4 py-2 transition-colors">
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-1.5">
+                                <p className="font-bold text-white text-[13px] truncate max-w-[140px]">{data.assetName}</p>
+                                {!isLive && (
+                                  <span title="The Yahoo Finance price for this asset could not be resolved. Falling back to the original Cost Basis value. You can add a ticker alias in Settings.">
+                                    <AlertTriangle className="w-3 h-3 text-yellow-500 cursor-help" />
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[10px] text-[#a1a1aa] font-mono tracking-wider">{assetId}</p>
+                              <p className="font-mono text-[10px] text-[#2979FF]/80 mt-1">Cost: €{data.totalInvested.toFixed(2)}</p>
+                            </div>
+                            <div className="flex flex-col items-end">
+                              <p className={`font-mono text-[13px] font-semibold privacy-mask ${isLive ? (isProfitable ? 'text-[#00E676]' : 'text-[#FF5252]') : 'text-[#c2c6d7]'}`}>
+                                €{liveValueEur.toFixed(2)}
+                              </p>
+                              {data.quantity > 0 && (
+                                <p className="font-mono text-[10px] text-[#a1a1aa] mt-0.5 privacy-mask">
+                                  {data.quantity.toFixed(2)} units 
+                                  {isLive && ` @ ${priceData.currency === 'USD' ? '$' : (priceData.currency === 'EUR' ? '€' : priceData.currency)}${priceData.price.toFixed(2)}`}
+                                </p>
+                              )}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
