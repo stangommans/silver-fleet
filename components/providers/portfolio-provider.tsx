@@ -20,6 +20,8 @@ interface PortfolioState {
   isPrivacyMode: boolean;
   togglePrivacyMode: () => void;
   holdings: Record<string, AssetHolding>;
+  totalDividends: number;
+  totalLending: number;
 }
 
 const PortfolioContext = createContext<PortfolioState | undefined>(undefined);
@@ -82,7 +84,7 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Calculate the derived portfolio state automatically whenever transactions change
-  const { cashBalance, holdings, totalInvested } = useMemo(() => {
+  const { cashBalance, holdings, totalInvested, totalDividends, totalLending } = useMemo(() => {
     return calculatePortfolioState(transactions);
   }, [transactions]);
 
@@ -174,6 +176,8 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
         isPrivacyMode,
         togglePrivacyMode,
         holdings,
+        totalDividends,
+        totalLending,
       }}
     >
       {children}

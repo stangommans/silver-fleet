@@ -1,11 +1,11 @@
 "use client";
 
 import { usePortfolio } from "@/components/providers/portfolio-provider";
-import { AlertTriangle, ArrowUpRight, ArrowDownRight, Search, ArrowUpDown, Filter } from "lucide-react";
+import { AlertTriangle, ArrowUpRight, ArrowDownRight, Search, ArrowUpDown, Filter, Landmark } from "lucide-react";
 import { useState, useMemo } from "react";
 
 export default function AssetsPage() {
-  const { holdings, livePrices, fxRates } = usePortfolio();
+  const { holdings, livePrices, fxRates, cashBalance } = usePortfolio();
   const [searchTerm, setSearchTerm] = useState("");
   const [showOnlyActive, setShowOnlyActive] = useState(true);
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>({ key: 'marketValueEur', direction: 'desc' });
@@ -25,7 +25,7 @@ export default function AssetsPage() {
           priceDisplay = `${priceData.currency === 'USD' ? '$' : (priceData.currency === 'EUR' ? '€' : priceData.currency)}${priceData.price.toFixed(2)}`;
         }
 
-        const rawProfit = marketValueEur - data.totalInvested;
+        const rawProfit = (marketValueEur + data.totalEarnings) - data.totalInvested;
         const profitPercent = data.totalInvested > 0 ? (rawProfit / data.totalInvested) * 100 : 0;
 
         return {
@@ -38,7 +38,25 @@ export default function AssetsPage() {
             profitPercent
         };
     });
-  }, [holdings, livePrices, fxRates]);
+
+    if (cashBalance > 0) {
+      data.push({
+        id: "CASH-EUR",
+        assetName: "Cash (EUR)",
+        quantity: cashBalance,
+        averageCostBasis: 1,
+        totalInvested: cashBalance,
+        isLive: true,
+        marketValueEur: cashBalance,
+        priceDisplay: "€1.00",
+        rawProfit: 0,
+        profitPercent: 0,
+        assetId: "CASH-EUR" // Needed for the rest of the component logic
+      } as any);
+    }
+
+    return data;
+  }, [holdings, livePrices, fxRates, cashBalance]);
 
   // 2. Apply Filters and Sorting
   const filteredHoldings = useMemo(() => {
@@ -61,6 +79,19 @@ export default function AssetsPage() {
 
     return result;
   }, [processedData, searchTerm, showOnlyActive, sortConfig]);
+
+  // 3. Calculate Totals
+  const totals = useMemo(() => {
+    return filteredHoldings.reduce((acc, item) => {
+      acc.totalInvested += item.totalInvested;
+      acc.marketValueEur += item.marketValueEur;
+      acc.totalEarnings = (acc.totalEarnings || 0) + item.totalEarnings;
+      acc.rawProfit += item.rawProfit;
+      return acc;
+    }, { totalInvested: 0, marketValueEur: 0, rawProfit: 0, totalEarnings: 0 });
+  }, [filteredHoldings]);
+
+  const totalProfitPercent = totals.totalInvested > 0 ? (totals.rawProfit / totals.totalInvested) * 100 : 0;
 
   const handleSort = (key: string) => {
     setSortConfig(prev => {
@@ -121,15 +152,18 @@ export default function AssetsPage() {
               <th className="px-6 py-4 text-right cursor-pointer hover:text-white group" onClick={() => handleSort('marketValueEur')}>
                 <div className="flex items-center justify-end gap-2">Market Val <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-100" /></div>
               </th>
+              <th className="px-6 py-4 text-right cursor-pointer hover:text-white group" onClick={() => handleSort('totalEarnings')}>
+                <div className="flex items-center justify-end gap-2">Earnings <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-100" /></div>
+              </th>
               <th className="px-6 py-4 text-right cursor-pointer hover:text-white group" onClick={() => handleSort('rawProfit')}>
-                <div className="flex items-center justify-end gap-2">Yield <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-100" /></div>
+                <div className="flex items-center justify-end gap-2">Total Yield <ArrowUpDown className="w-3 h-3 opacity-0 group-hover:opacity-100" /></div>
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#2D3139]">
             {filteredHoldings.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-6 py-12 text-center text-[#a1a1aa] italic text-sm">
+                <td colSpan={8} className="px-6 py-12 text-center text-[#a1a1aa] italic text-sm">
                   No assets found matching your criteria.
                 </td>
               </tr>
@@ -142,8 +176,9 @@ export default function AssetsPage() {
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
+                          {item.id === "CASH-EUR" && <Landmark className="w-3.5 h-3.5 text-[#2979FF]" />}
                           <span className="font-bold text-white text-sm truncate max-w-[240px]">{item.assetName}</span>
-                          {!item.isLive && (
+                          {!item.isLive && item.id !== "CASH-EUR" && (
                              <span title="The Yahoo Finance price for this asset could not be resolved. Falling back to the original Cost Basis value.">
                                <AlertTriangle className="w-3.5 h-3.5 text-yellow-500 cursor-help" />
                              </span>
@@ -160,7 +195,10 @@ export default function AssetsPage() {
                     </td>
                     <td className="px-6 py-4 text-right font-mono text-sm font-bold text-white privacy-mask">
                       €{item.marketValueEur.toFixed(2)}
-                      {!item.isLive && <span className="text-[10px] text-yellow-500/50 ml-1">(Cost)</span>}
+                      {!item.isLive && item.id !== "CASH-EUR" && <span className="text-[10px] text-yellow-500/50 ml-1">(Cost)</span>}
+                    </td>
+                    <td className="px-6 py-4 text-right font-mono text-sm text-[#00E676] privacy-mask">
+                      {item.totalEarnings > 0 ? `+€${item.totalEarnings.toFixed(2)}` : '—'}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className={`flex flex-col items-end privacy-mask ${isProfitable ? 'text-[#00E676]' : 'text-[#FF5252]'}`}>
@@ -178,6 +216,34 @@ export default function AssetsPage() {
               })
             )}
           </tbody>
+          {filteredHoldings.length > 0 && (
+            <tfoot className="bg-[#2D3139]/20 border-t-2 border-[#2D3139]">
+              <tr className="font-bold text-white group">
+                <td className="px-6 py-5 text-sm uppercase tracking-wider font-heading">Total</td>
+                <td className="px-6 py-5"></td>
+                <td className="px-6 py-5 text-right"></td>
+                <td className="px-6 py-5 text-right font-mono text-sm privacy-mask">€{totals.totalInvested.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                <td className="px-6 py-5 text-right"></td>
+                <td className="px-6 py-5 text-right font-mono text-sm privacy-mask text-[#2979FF]">
+                  €{totals.marketValueEur.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </td>
+                <td className="px-6 py-5 text-right font-mono text-sm text-[#00E676] privacy-mask">
+                  +€{totals.totalEarnings.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </td>
+                <td className="px-6 py-5 text-right">
+                  <div className={`flex flex-col items-end privacy-mask ${totals.rawProfit >= 0 ? 'text-[#00E676]' : 'text-[#FF5252]'}`}>
+                    <div className="flex items-center gap-1 font-mono text-sm font-bold">
+                      {totals.rawProfit >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                      €{Math.abs(totals.rawProfit).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                    <span className="text-[10px] font-mono opacity-80">
+                      {totals.rawProfit >= 0 ? '+' : ''}{totalProfitPercent.toFixed(2)}%
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
     </div>

@@ -9,7 +9,7 @@ import { AlertTriangle } from 'lucide-react';
 import { AllocationChart } from "@/components/dashboard/allocation-chart";
 
 export default function Home() {
-  const { transactions, totalInvested, cashBalance, holdings, livePortfolioValue, livePrices, fxRates } = usePortfolio();
+  const { transactions, totalInvested, cashBalance, holdings, livePortfolioValue, livePrices, fxRates, totalDividends, totalLending } = usePortfolio();
 
   return (
     <div className="flex flex-col gap-8 font-sans">
@@ -33,7 +33,7 @@ export default function Home() {
       ) : (
         <>
           {/* Top Level Metrics */}
-          <MetricsBar totalInvested={totalInvested} cashBalance={cashBalance} livePortfolioValue={livePortfolioValue} />
+          <MetricsBar totalInvested={totalInvested} cashBalance={cashBalance} livePortfolioValue={livePortfolioValue} totalDividends={totalDividends} totalLending={totalLending} />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 flex flex-col gap-6">
