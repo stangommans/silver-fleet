@@ -53,7 +53,8 @@ async function ensureDbExists() {
 }
 
 /**
- * Reads entire state directly from hard drive
+ * Reads entire state directly from hard drive.
+ * Now primarily used for providing default ticker aliases.
  */
 export async function getFullStateFromDB(): Promise<DatabaseSchema> {
   await ensureDbExists();
@@ -61,32 +62,22 @@ export async function getFullStateFromDB(): Promise<DatabaseSchema> {
     const rawData = await fs.readFile(DB_FILE, "utf-8");
     const parsed = JSON.parse(rawData);
     
-    // Migration logic: If it's an array, it's an old DB. Convert to new schema.
-    if (Array.isArray(parsed)) {
-       return { ...DEFAULT_DB, transactions: parsed };
-    }
-    
     return {
         ...DEFAULT_DB,
         ...parsed,
+        transactions: [], // NEVER return transactions from the server-side DB for security
         settings: { ...DEFAULT_DB.settings, ...parsed.settings }
     };
   } catch (error) {
-    console.error("Failed to read DB:", error);
     return DEFAULT_DB;
   }
 }
 
 /**
- * Commits the entire state to the JSON flat file.
+ * DEPRECATED: We no longer save transactions to the server for privacy reasons.
+ * Use client-side StorageManager instead.
  */
 export async function saveFullStateToDB(state: DatabaseSchema) {
-  await ensureDbExists();
-  try {
-    await fs.writeFile(DB_FILE, JSON.stringify(state, null, 2), "utf-8");
-    return { success: true };
-  } catch (error) {
-    console.error("Failed to write DB:", error);
-    return { success: false, error };
-  }
+  console.warn("Attempted to save state to server DB. Action blocked for privacy.");
+  return { success: false, error: "Server-side persistence is disabled." };
 }

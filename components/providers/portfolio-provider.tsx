@@ -3,8 +3,9 @@
 import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
 import { BuxTransaction } from "@/lib/parsers/bux";
 import { calculatePortfolioState, AssetHolding } from "@/lib/portfolio-math";
-import { getFullStateFromDB, saveFullStateToDB } from "@/app/actions/database";
+import { getFullStateFromDB } from "@/app/actions/database";
 import { getLivePrices, PriceData } from "@/app/actions/prices";
+import { StorageManager } from "@/lib/storage";
 
 interface PortfolioState {
   transactions: BuxTransaction[];
@@ -32,30 +33,50 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
   const [livePrices, setLivePrices] = useState<Record<string, PriceData>>({});
   const [fxRates, setFxRates] = useState<Record<string, number>>({ "EUR": 1 });
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isPrivacyMode, setIsPrivacyMode] = useState(false);
+  const togglePrivacyMode = () => setIsPrivacyMode(!isPrivacyMode);
 
-  // Initialize from Local JSON Database
+  // Initialize from Local Storage with Server Fallback (Migration)
   useEffect(() => {
-    getFullStateFromDB()
-      .then((state) => {
-        setTransactions(state.transactions);
-        setTickerAliases(state.settings.tickerAliases);
-        setIsLoaded(true);
-      })
-      .catch((e) => {
-        console.error("Failed to pull from Database", e);
-        setIsLoaded(true);
-      });
+    const localTransactions = StorageManager.getItem("TRANSACTIONS", null);
+    const localAliases = StorageManager.getItem("TICKER_ALIASES", null);
+    const hasMigrated = StorageManager.getItem("MIGRATED", false);
+
+    if (localTransactions !== null && localAliases !== null) {
+      // Use local storage if available
+      setTransactions(localTransactions);
+      setTickerAliases(localAliases);
+      setIsLoaded(true);
+    } else if (!hasMigrated) {
+      // Perform one-time migration from server DB
+      getFullStateFromDB()
+        .then((state) => {
+          setTransactions(state.transactions);
+          setTickerAliases(state.settings.tickerAliases);
+          StorageManager.setItem("MIGRATED", true);
+          setIsLoaded(true);
+        })
+        .catch((e) => {
+          console.error("Migration from server DB failed", e);
+          setIsLoaded(true);
+        });
+    } else {
+      setIsLoaded(true);
+    }
+    
+    // Load privacy mode
+    const localPrivacy = StorageManager.getItem("PRIVACY_MODE", false);
+    setIsPrivacyMode(localPrivacy);
   }, []);
 
-  // Sync back to File System Database whenever state mutates
+  // Sync back to Browser Local Storage whenever state mutates
   useEffect(() => {
     if (isLoaded) {
-      saveFullStateToDB({
-          transactions,
-          settings: { tickerAliases }
-      }).catch(e => console.error("Failed to commit to Database", e));
+      StorageManager.setItem("TRANSACTIONS", transactions);
+      StorageManager.setItem("TICKER_ALIASES", tickerAliases);
+      StorageManager.setItem("PRIVACY_MODE", isPrivacyMode);
     }
-  }, [transactions, tickerAliases, isLoaded]);
+  }, [transactions, tickerAliases, isPrivacyMode, isLoaded]);
 
   const addManualTransaction = (newTx: BuxTransaction) => {
     setTransactions((prev) => {
@@ -146,9 +167,6 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
     }
     return value;
   }, [holdings, livePrices, fxRates]);
-
-  const [isPrivacyMode, setIsPrivacyMode] = useState(false);
-  const togglePrivacyMode = () => setIsPrivacyMode(!isPrivacyMode);
 
   // Sync privacy mode to document attribute for CSS targeting
   useEffect(() => {
