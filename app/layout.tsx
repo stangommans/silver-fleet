@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 import { PortfolioProvider } from "@/components/providers/portfolio-provider";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { Topbar } from "@/components/dashboard/topbar";
+import { MobileNav } from "@/components/dashboard/mobile-nav";
 
 export default function RootLayout({
   children,
@@ -35,9 +36,10 @@ export default function RootLayout({
         <PortfolioProvider>
           <Sidebar />
           <Topbar />
-          <main className="pt-20 pb-8 px-6 md:ml-64 max-w-[1600px] mx-auto min-h-screen w-full transition-all">
+          <main className="pt-20 pb-20 md:pb-8 px-6 md:ml-64 max-w-[1600px] mx-auto min-h-screen w-full transition-all">
             {children}
           </main>
+          <MobileNav />
         </PortfolioProvider>
       </body>
     </html>

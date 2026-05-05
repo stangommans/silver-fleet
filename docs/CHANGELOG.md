@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Mobile Navigation Bar: Fixed bottom navigation bar for seamless access on small screens.
 - Trading Bot Command Center: New `/bot` dashboard with real-time operational transparency.
 - Terminal-Style Signal Log: Live logging component for tracking bot decisions and EMA/RSI signals.
 - Active Bot Holdings View: Dedicated tracking of bot-managed positions with live PnL and liquidation controls.
