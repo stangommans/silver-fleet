@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, LineChart, PieChart, UploadCloud, Settings, User, Eye, EyeOff } from "lucide-react";
+import { LayoutDashboard, LineChart, PieChart, UploadCloud, Settings, User, Eye, EyeOff, Bot } from "lucide-react";
 import { usePortfolio } from "@/components/providers/portfolio-provider";
 
 export function Sidebar() {
@@ -12,6 +12,7 @@ export function Sidebar() {
   const links = [
     { name: "Executive Overview", href: "/", icon: LayoutDashboard },
     { name: "Holdings Matrix", href: "/assets", icon: PieChart },
+    { name: "Trading Bot", href: "/bot", icon: Bot },
     { name: "CSV Data Import", href: "/import", icon: UploadCloud },
     { name: "System Settings", href: "/settings", icon: Settings },
   ];

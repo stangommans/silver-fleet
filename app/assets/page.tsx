@@ -12,25 +12,25 @@ export default function AssetsPage() {
 
   // 1. Process Raw Data into Sortable/Filterable Objects
   const processedData = useMemo(() => {
-    return Object.entries(holdings).map(([id, data]) => {
+    const data = Object.entries(holdings).map(([id, assetData]) => {
         const priceData = livePrices[id];
         const isLive = priceData != null;
         
-        let marketValueEur = data.totalInvested;
+        let marketValueEur = assetData.totalInvested;
         let priceDisplay = "N/A";
         
         if (isLive) {
           const rate = fxRates[priceData.currency] || 1;
-          marketValueEur = (priceData.price * rate) * data.quantity;
+          marketValueEur = (priceData.price * rate) * assetData.quantity;
           priceDisplay = `${priceData.currency === 'USD' ? '$' : (priceData.currency === 'EUR' ? '€' : priceData.currency)}${priceData.price.toFixed(2)}`;
         }
 
-        const rawProfit = (marketValueEur + data.totalEarnings) - data.totalInvested;
-        const profitPercent = data.totalInvested > 0 ? (rawProfit / data.totalInvested) * 100 : 0;
+        const rawProfit = (marketValueEur + assetData.totalEarnings) - assetData.totalInvested;
+        const profitPercent = assetData.totalInvested > 0 ? (rawProfit / assetData.totalInvested) * 100 : 0;
 
         return {
             id,
-            ...data,
+            ...assetData,
             isLive,
             marketValueEur,
             priceDisplay,
@@ -46,6 +46,7 @@ export default function AssetsPage() {
         quantity: cashBalance,
         averageCostBasis: 1,
         totalInvested: cashBalance,
+        totalEarnings: 0,
         isLive: true,
         marketValueEur: cashBalance,
         priceDisplay: "€1.00",
